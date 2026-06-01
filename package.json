@@ -1,0 +1,41 @@
+{
+  "name": "budget-tracker",
+  "version": "1.0.0",
+  "description": "Event Budget Tracker for church and school (Lucena City, Quezon)",
+  "main": "electron/main.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev:vite": "vite",
+    "dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "package": "vite build && electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.106.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^6.0.2",
+    "concurrently": "^10.0.1",
+    "electron": "^42.3.0",
+    "electron-builder": "^26.8.1",
+    "jsdom": "^29.1.1",
+    "vite": "^8.0.15",
+    "vitest": "^4.1.7",
+    "wait-on": "^9.0.10"
+  }
+}
