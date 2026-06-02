@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "Event Budget Tracker for church and school (Lucena City, Quezon)",
   "main": "electron/main.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "dev:vite": "vite",
     "dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
