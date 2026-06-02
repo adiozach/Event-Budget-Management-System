@@ -15,23 +15,25 @@ export default function SettingsScreen({ profile }) {
     setUsers((u) => u.map((x) => (x.id === id ? { ...x, role } : x)));
   }
 
-  if (!isAdmin) return <p>Only admins can manage users.</p>;
+  if (!isAdmin) {
+    return <div className="panel"><p className="muted">Only admins can manage users.</p></div>;
+  }
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Users</h2>
-      <p style={{ color: '#666' }}>
-        To add a new user: create them in Supabase Auth, then they appear here after their
-        first profile row is created. Set their role below.
+    <div className="panel">
+      <div className="panel-head"><h2 className="panel-title">Users &amp; Roles</h2></div>
+      <p className="muted" style={{ marginTop: 0 }}>
+        To add a new user: create them in Supabase Auth — they appear here once their profile exists. Set roles below.
       </p>
-      <table border="1" cellPadding="6">
+      <table className="table">
         <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
         <tbody>
           {users.map((u) => (
             <tr key={u.id}>
-              <td>{u.name}</td><td>{u.email}</td>
+              <td style={{ fontWeight: 600 }}>{u.name}</td>
+              <td>{u.email}</td>
               <td>
-                <select value={u.role} onChange={(e) => setRole(u.id, e.target.value)}>
+                <select className="input" value={u.role} onChange={(e) => setRole(u.id, e.target.value)}>
                   <option value="admin">admin</option>
                   <option value="treasurer">treasurer</option>
                 </select>

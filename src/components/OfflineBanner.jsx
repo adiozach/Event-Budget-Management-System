@@ -10,9 +10,5 @@ export default function OfflineBanner() {
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
   }, []);
   if (online) return null;
-  return (
-    <div style={{ background: '#b00', color: 'white', padding: 8, textAlign: 'center' }}>
-      You're offline — connect to save changes.
-    </div>
-  );
+  return <div className="offline">You're offline — connect to save changes.</div>;
 }

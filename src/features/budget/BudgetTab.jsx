@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
+import Icon from '../../components/Icon.jsx';
 
 export default function BudgetTab({ event, categories, onChange }) {
   const [name, setName] = useState('');
@@ -21,25 +22,30 @@ export default function BudgetTab({ event, categories, onChange }) {
   }
 
   return (
-    <div>
-      <form onSubmit={add}>
-        <input placeholder="Category (e.g. Food)" value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="number" min="0" step="0.01" placeholder="Planned ₱"
+    <div className="panel">
+      <div className="panel-head"><h2 className="panel-title">Budget Categories</h2></div>
+      <form onSubmit={add} className="form-row">
+        <input className="input" placeholder="Category (e.g. Food)" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="input" type="number" min="0" step="0.01" placeholder="Planned ₱"
           value={amount} onChange={(e) => setAmount(e.target.value)} />
-        <button>Add category</button>
+        <button className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> Add category</button>
       </form>
-      <table border="1" cellPadding="6" style={{ marginTop: 12 }}>
-        <thead><tr><th>Category</th><th>Planned</th><th></th></tr></thead>
-        <tbody>
-          {categories.map((c) => (
-            <tr key={c.id}>
-              <td>{c.name}</td>
-              <td>{formatPeso(c.planned_amount)}</td>
-              <td><button onClick={() => remove(c.id)}>Delete</button></td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {categories.length === 0 ? (
+        <div className="empty"><p>No categories yet. Add one above to set your planned budget.</p></div>
+      ) : (
+        <table className="table">
+          <thead><tr><th>Category</th><th>Planned</th><th></th></tr></thead>
+          <tbody>
+            {categories.map((c) => (
+              <tr key={c.id}>
+                <td style={{ fontWeight: 600 }}>{c.name}</td>
+                <td className="num">{formatPeso(c.planned_amount)}</td>
+                <td><button className="btn btn-sm btn-reject" onClick={() => remove(c.id)}>Delete</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

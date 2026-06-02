@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import { uploadReceipt } from '../receipts/uploadReceipt.js';
+import Icon from '../../components/Icon.jsx';
 
 export default function ExpensesTab({ event, data, profile, onChange }) {
   const { categories, expenses } = data;
@@ -57,43 +58,48 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
   }
 
   return (
-    <div>
-      <form onSubmit={add}>
-        <input type="number" min="0" step="0.01" placeholder="Amount ₱"
+    <div className="panel">
+      <div className="panel-head"><h2 className="panel-title">Expenses</h2></div>
+      <form onSubmit={add} className="form-row">
+        <input className="input" type="number" min="0" step="0.01" placeholder="Amount ₱"
           value={form.amount} onChange={(e) => set('amount', e.target.value)} required />
-        <input type="date" value={form.expense_date} onChange={(e) => set('expense_date', e.target.value)} />
-        <input placeholder="Description" value={form.description} onChange={(e) => set('description', e.target.value)} />
-        <input placeholder="Paid by" value={form.paid_by} onChange={(e) => set('paid_by', e.target.value)} />
-        <select value={form.category_id} onChange={(e) => set('category_id', e.target.value)}>
+        <input className="input" type="date" value={form.expense_date} onChange={(e) => set('expense_date', e.target.value)} />
+        <input className="input" placeholder="Description" value={form.description} onChange={(e) => set('description', e.target.value)} />
+        <input className="input" placeholder="Paid by" value={form.paid_by} onChange={(e) => set('paid_by', e.target.value)} />
+        <select className="input" value={form.category_id} onChange={(e) => set('category_id', e.target.value)}>
           <option value="">(no category)</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
-        <input type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
-        <button disabled={busy}>{busy ? 'Saving…' : 'Add expense'}</button>
+        <input className="input" type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
+        <button className="btn btn-primary btn-sm" disabled={busy}>{busy ? 'Saving…' : 'Add expense'}</button>
       </form>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-      <table border="1" cellPadding="6" style={{ marginTop: 12, width: '100%' }}>
-        <thead><tr><th>Date</th><th>Description</th><th>Paid by</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody>
-          {expenses.map((x) => (
-            <tr key={x.id}>
-              <td>{x.expense_date}</td>
-              <td>{x.description}</td>
-              <td>{x.paid_by}</td>
-              <td>{formatPeso(x.amount)}</td>
-              <td>{x.approval_status}</td>
-              <td>
-                {x.approval_status === 'pending' ? (
-                  <>
-                    <button onClick={() => decide(x.id, 'approved')}>Approve</button>
-                    <button onClick={() => decide(x.id, 'rejected')}>Reject</button>
-                  </>
-                ) : '—'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {error && <p className="error-text">{error}</p>}
+      {expenses.length === 0 ? (
+        <div className="empty"><p>No expenses recorded yet.</p></div>
+      ) : (
+        <table className="table">
+          <thead><tr><th>Date</th><th>Description</th><th>Paid by</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            {expenses.map((x) => (
+              <tr key={x.id}>
+                <td>{x.expense_date}</td>
+                <td>{x.description}</td>
+                <td>{x.paid_by}</td>
+                <td className="num">{formatPeso(x.amount)}</td>
+                <td><span className={`pill ${x.approval_status}`}>{x.approval_status}</span></td>
+                <td>
+                  {x.approval_status === 'pending' ? (
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="btn btn-sm btn-approve" onClick={() => decide(x.id, 'approved')}>Approve</button>
+                      <button className="btn btn-sm btn-reject" onClick={() => decide(x.id, 'rejected')}>Reject</button>
+                    </div>
+                  ) : <span className="muted">—</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

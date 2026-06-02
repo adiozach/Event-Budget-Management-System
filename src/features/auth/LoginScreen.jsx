@@ -20,14 +20,26 @@ export default function LoginScreen({ onSignIn }) {
   }
 
   return (
-    <form onSubmit={submit} style={{ maxWidth: 320, margin: '80px auto' }}>
-      <h2>Event Budget Tracker</h2>
-      <input type="email" placeholder="Email" value={email}
-        onChange={(e) => setEmail(e.target.value)} required />
-      <input type="password" placeholder="Password" value={password}
-        onChange={(e) => setPassword(e.target.value)} required />
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-      <button disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
-    </form>
+    <div className="login-wrap">
+      <form onSubmit={submit} className="login-card">
+        <div className="brand">
+          <div className="brand-mark">₱</div>
+          <div>
+            <div className="brand-name">Budget Tracker</div>
+            <div className="brand-sub">Lucena City</div>
+          </div>
+        </div>
+        <h2>Welcome back</h2>
+        <div className="page-sub">Sign in to manage event budgets</div>
+        <input className="input" type="email" placeholder="Email" value={email}
+          onChange={(e) => setEmail(e.target.value)} required />
+        <input className="input" type="password" placeholder="Password" value={password}
+          onChange={(e) => setPassword(e.target.value)} required />
+        {error && <p className="error-text">{error}</p>}
+        <button className="btn btn-primary" disabled={busy}>
+          {busy ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
+    </div>
   );
 }

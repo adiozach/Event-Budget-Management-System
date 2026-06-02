@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import { uploadReceipt } from '../receipts/uploadReceipt.js';
+import Icon from '../../components/Icon.jsx';
 
 export default function IncomeTab({ event, income, profile, onChange }) {
   const [form, setForm] = useState({ amount: '', income_date: '', source: '', description: '' });
@@ -45,28 +46,36 @@ export default function IncomeTab({ event, income, profile, onChange }) {
   }
 
   return (
-    <div>
-      <form onSubmit={add}>
-        <input type="number" min="0" step="0.01" placeholder="Amount ₱"
+    <div className="panel">
+      <div className="panel-head"><h2 className="panel-title">Income</h2></div>
+      <form onSubmit={add} className="form-row">
+        <input className="input" type="number" min="0" step="0.01" placeholder="Amount ₱"
           value={form.amount} onChange={(e) => set('amount', e.target.value)} required />
-        <input type="date" value={form.income_date} onChange={(e) => set('income_date', e.target.value)} />
-        <input placeholder="Source (e.g. Ticket Sales)" value={form.source}
+        <input className="input" type="date" value={form.income_date} onChange={(e) => set('income_date', e.target.value)} />
+        <input className="input" placeholder="Source (e.g. Ticket Sales)" value={form.source}
           onChange={(e) => set('source', e.target.value)} required />
-        <input placeholder="Description" value={form.description} onChange={(e) => set('description', e.target.value)} />
-        <input type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
-        <button disabled={busy}>{busy ? 'Saving…' : 'Add income'}</button>
+        <input className="input" placeholder="Description" value={form.description} onChange={(e) => set('description', e.target.value)} />
+        <input className="input" type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
+        <button className="btn btn-primary btn-sm" disabled={busy}>{busy ? 'Saving…' : 'Add income'}</button>
       </form>
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-      <table border="1" cellPadding="6" style={{ marginTop: 12, width: '100%' }}>
-        <thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Amount</th></tr></thead>
-        <tbody>
-          {income.map((i) => (
-            <tr key={i.id}>
-              <td>{i.income_date}</td><td>{i.source}</td><td>{i.description}</td><td>{formatPeso(i.amount)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {error && <p className="error-text">{error}</p>}
+      {income.length === 0 ? (
+        <div className="empty"><p>No income recorded yet.</p></div>
+      ) : (
+        <table className="table">
+          <thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Amount</th></tr></thead>
+          <tbody>
+            {income.map((i) => (
+              <tr key={i.id}>
+                <td>{i.income_date}</td>
+                <td style={{ fontWeight: 600 }}>{i.source}</td>
+                <td>{i.description}</td>
+                <td className="num pos">{formatPeso(i.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }
