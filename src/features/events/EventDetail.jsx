@@ -7,8 +7,9 @@ import BudgetTab from '../budget/BudgetTab.jsx';
 import ExpensesTab from '../expenses/ExpensesTab.jsx';
 import IncomeTab from '../income/IncomeTab.jsx';
 import ReportsTab from '../reports/ReportsTab.jsx';
+import AnalyticsTab from '../analytics/AnalyticsTab.jsx';
 
-const TABS = ['Overview', 'Budget', 'Expenses', 'Income', 'Reports'];
+const TABS = ['Overview', 'Analytics', 'Budget', 'Expenses', 'Income', 'Reports'];
 
 const KPIS = [
   { key: 'totalPlanned', label: 'Total Planned', cls: 'teal', icon: 'wallet' },
@@ -77,6 +78,7 @@ export default function EventDetail({ org, event, profile, onBack }) {
         </>
       )}
 
+      {tab === 'Analytics' && <AnalyticsTab data={data} />}
       {tab === 'Budget' && <BudgetTab event={event} categories={data.categories} onChange={load} />}
       {tab === 'Expenses' && <ExpensesTab event={event} data={data} profile={profile} onChange={load} />}
       {tab === 'Income' && <IncomeTab event={event} income={data.income} profile={profile} onChange={load} />}
