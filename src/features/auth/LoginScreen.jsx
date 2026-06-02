@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../../assets/logo.png';
 
 const FRIENDLY = {
   'Invalid login credentials': 'Wrong email or password.',
@@ -22,9 +23,9 @@ export default function LoginScreen({ onSignIn }) {
   return (
     <div className="login-wrap">
       <form onSubmit={submit} className="login-card">
-        <div className="brand">
-          <div className="brand-mark">₱</div>
-          <div>
+        <div className="brand" style={{ flexDirection: 'column', gap: 8 }}>
+          <img src={logo} className="brand-logo-lg" alt="Logo" />
+          <div style={{ textAlign: 'center' }}>
             <div className="brand-name">Budget Tracker</div>
             <div className="brand-sub">Lucena City</div>
           </div>

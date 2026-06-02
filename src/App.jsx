@@ -8,6 +8,7 @@ import SettingsScreen from './features/settings/SettingsScreen.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
 import Icon from './components/Icon.jsx';
 import { Toaster } from './components/toast.jsx';
+import logo from './assets/logo.png';
 
 function initials(name) {
   if (!name) return '?';
@@ -54,7 +55,7 @@ export default function App() {
       <div className="app-shell">
         <aside className="sidebar">
           <div className="brand">
-            <div className="brand-mark">₱</div>
+            <img src={logo} className="brand-logo" alt="Logo" />
             <div>
               <div className="brand-name">Budget Tracker</div>
               <div className="brand-sub">Lucena City</div>
