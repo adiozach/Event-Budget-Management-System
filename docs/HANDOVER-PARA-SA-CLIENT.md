@@ -1,6 +1,6 @@
 # Event Budget Tracker — Handover Note
 
-**Para sa:** [Pangalan ng Client / Simbahan / Paaralan]
+**Para sa:** Grace Baptist Church
 **Petsa ng turnover:** _______________
 **Inihanda ni:** Allan Chester Lagrason
 
