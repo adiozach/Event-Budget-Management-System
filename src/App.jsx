@@ -67,7 +67,7 @@ export default function App() {
             <button key={o.id}
               className={`nav-item ${view === 'events' && org?.id === o.id ? 'active' : ''}`}
               onClick={() => pickOrg(o)}>
-              <Icon name={o.name === 'School' ? 'school' : 'church'} />
+              <Icon name={/school|bvbc/i.test(o.name) ? 'school' : 'church'} />
               {o.name}
             </button>
           ))}

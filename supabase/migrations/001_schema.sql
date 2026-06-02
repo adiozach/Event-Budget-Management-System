@@ -3,7 +3,7 @@ create table organizations (
   id uuid primary key default gen_random_uuid(),
   name text not null unique
 );
-insert into organizations (name) values ('Church'), ('School');
+insert into organizations (name) values ('GBC'), ('BVBC');
 
 -- User profiles (auth handled by Supabase Auth; this holds role)
 create table profiles (
