@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase.js';
 export function useAuth() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [profileError, setProfileError] = useState('');
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId) => {
@@ -14,9 +15,11 @@ export function useAuth() {
       .maybeSingle();
     if (error) {
       console.warn('profile fetch error:', error.message);
+      setProfileError(error.message);
       setProfile(null);
       return;
     }
+    setProfileError(data ? '' : 'no profile row matched this user id');
     setProfile(data || null);
   }, []);
 
@@ -38,5 +41,5 @@ export function useAuth() {
   const signOut = () => supabase.auth.signOut();
   const refreshProfile = () => { if (session) fetchProfile(session.user.id); };
 
-  return { session, profile, loading, signIn, signOut, refreshProfile };
+  return { session, profile, profileError, loading, signIn, signOut, refreshProfile };
 }
