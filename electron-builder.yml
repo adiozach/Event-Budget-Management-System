@@ -2,11 +2,16 @@ appId: com.lucena.eventbudgettracker
 productName: Event Budget Tracker
 directories:
   output: release
+  buildResources: build
 files:
   - dist/**/*
   - electron/**/*
 win:
   target: nsis
+  icon: build/icon.png
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
+  installerIcon: build/icon.png
+  uninstallerIcon: build/icon.png
+  shortcutName: Event Budget Tracker
