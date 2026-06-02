@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
+import { toast } from '../../components/toast.jsx';
 
 export default function BudgetTab({ event, categories, onChange }) {
   const [name, setName] = useState('');
@@ -13,11 +14,14 @@ export default function BudgetTab({ event, categories, onChange }) {
     if (!name.trim() || isNaN(planned) || planned < 0) return;
     await supabase.from('budget_categories')
       .insert({ event_id: event.id, name: name.trim(), planned_amount: planned });
-    setName(''); setAmount(''); onChange();
+    setName(''); setAmount('');
+    toast.success('Category added');
+    onChange();
   }
 
   async function remove(id) {
     await supabase.from('budget_categories').delete().eq('id', id);
+    toast.success('Category deleted');
     onChange();
   }
 

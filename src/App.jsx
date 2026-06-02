@@ -7,6 +7,7 @@ import EventDetail from './features/events/EventDetail.jsx';
 import SettingsScreen from './features/settings/SettingsScreen.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
 import Icon from './components/Icon.jsx';
+import { Toaster } from './components/toast.jsx';
 
 function initials(name) {
   if (!name) return '?';
@@ -32,6 +33,7 @@ export default function App() {
     return (
       <>
         <OfflineBanner />
+        <Toaster />
         <LoginScreen onSignIn={signIn} />
       </>
     );
@@ -48,6 +50,7 @@ export default function App() {
   return (
     <>
       <OfflineBanner />
+      <Toaster />
       <div className="app-shell">
         <aside className="sidebar">
           <div className="brand">

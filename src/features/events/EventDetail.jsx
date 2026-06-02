@@ -8,6 +8,7 @@ import ExpensesTab from '../expenses/ExpensesTab.jsx';
 import IncomeTab from '../income/IncomeTab.jsx';
 import ReportsTab from '../reports/ReportsTab.jsx';
 import AnalyticsTab from '../analytics/AnalyticsTab.jsx';
+import { SkeletonCards } from '../../components/Skeleton.jsx';
 
 const TABS = ['Overview', 'Analytics', 'Budget', 'Expenses', 'Income', 'Reports'];
 
@@ -21,6 +22,7 @@ const KPIS = [
 export default function EventDetail({ org, event, profile, onBack }) {
   const [tab, setTab] = useState('Overview');
   const [data, setData] = useState({ categories: [], expenses: [], income: [] });
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     const [{ data: categories }, { data: expenses }, { data: income }] = await Promise.all([
@@ -29,9 +31,10 @@ export default function EventDetail({ org, event, profile, onBack }) {
       supabase.from('income').select('*').eq('event_id', event.id),
     ]);
     setData({ categories: categories || [], expenses: expenses || [], income: income || [] });
+    setLoading(false);
   }, [event.id]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setLoading(true); load(); }, [load]);
 
   const totals = computeEventTotals(data);
   const spentPct = totals.totalPlanned ? (totals.totalSpent / totals.totalPlanned) * 100 : 0;
@@ -47,7 +50,9 @@ export default function EventDetail({ org, event, profile, onBack }) {
         ))}
       </div>
 
-      {tab === 'Overview' && (
+      {loading && tab === 'Overview' && <SkeletonCards count={4} />}
+
+      {!loading && tab === 'Overview' && (
         <>
           <div className="kpi-grid">
             {KPIS.map((k) => (

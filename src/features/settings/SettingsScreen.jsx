@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase.js';
+import { toast } from '../../components/toast.jsx';
 
 export default function SettingsScreen({ profile }) {
   const [users, setUsers] = useState([]);
@@ -13,6 +14,7 @@ export default function SettingsScreen({ profile }) {
   async function setRole(id, role) {
     await supabase.from('profiles').update({ role }).eq('id', id);
     setUsers((u) => u.map((x) => (x.id === id ? { ...x, role } : x)));
+    toast.success('Role updated');
   }
 
   if (!isAdmin) {

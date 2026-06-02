@@ -3,11 +3,11 @@ import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import { uploadReceipt } from '../receipts/uploadReceipt.js';
 import Icon from '../../components/Icon.jsx';
+import { toast } from '../../components/toast.jsx';
 
 export default function IncomeTab({ event, income, profile, onChange }) {
   const [form, setForm] = useState({ amount: '', income_date: '', source: '', description: '' });
   const [file, setFile] = useState(null);
-  const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
@@ -17,7 +17,6 @@ export default function IncomeTab({ event, income, profile, onChange }) {
     const amount = parseFloat(form.amount);
     if (isNaN(amount) || amount < 0 || !form.source.trim()) return;
     setBusy(true);
-    setError('');
     try {
       const { data: row, error: insErr } = await supabase.from('income').insert({
         event_id: event.id,
@@ -37,9 +36,10 @@ export default function IncomeTab({ event, income, profile, onChange }) {
       setForm({ amount: '', income_date: '', source: '', description: '' });
       setFile(null);
       e.target.reset();
+      toast.success('Income added');
       onChange();
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setBusy(false);
     }
@@ -58,7 +58,6 @@ export default function IncomeTab({ event, income, profile, onChange }) {
         <input className="input" type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
         <button className="btn btn-primary btn-sm" disabled={busy}>{busy ? 'Saving…' : 'Add income'}</button>
       </form>
-      {error && <p className="error-text">{error}</p>}
       {income.length === 0 ? (
         <div className="empty"><p>No income recorded yet.</p></div>
       ) : (

@@ -19,6 +19,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
     "@supabase/supabase-js": "^2.106.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

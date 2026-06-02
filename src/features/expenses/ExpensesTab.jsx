@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import { uploadReceipt } from '../receipts/uploadReceipt.js';
 import Icon from '../../components/Icon.jsx';
+import { toast } from '../../components/toast.jsx';
 
 export default function ExpensesTab({ event, data, profile, onChange }) {
   const { categories, expenses } = data;
@@ -10,7 +11,6 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
     amount: '', expense_date: '', description: '', paid_by: '', category_id: '',
   });
   const [file, setFile] = useState(null);
-  const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
@@ -20,7 +20,6 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
     const amount = parseFloat(form.amount);
     if (isNaN(amount) || amount < 0) return;
     setBusy(true);
-    setError('');
     try {
       const { data: row, error: insErr } = await supabase.from('expenses').insert({
         event_id: event.id,
@@ -42,9 +41,10 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
       setForm({ amount: '', expense_date: '', description: '', paid_by: '', category_id: '' });
       setFile(null);
       e.target.reset();
+      toast.success('Expense added');
       onChange();
     } catch (err) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setBusy(false);
     }
@@ -54,6 +54,7 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
     await supabase.from('expenses')
       .update({ approval_status: status, approved_by: profile.id })
       .eq('id', id);
+    toast.success(status === 'approved' ? 'Expense approved' : 'Expense rejected');
     onChange();
   }
 
@@ -73,7 +74,6 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
         <input className="input" type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
         <button className="btn btn-primary btn-sm" disabled={busy}>{busy ? 'Saving…' : 'Add expense'}</button>
       </form>
-      {error && <p className="error-text">{error}</p>}
       {expenses.length === 0 ? (
         <div className="empty"><p>No expenses recorded yet.</p></div>
       ) : (

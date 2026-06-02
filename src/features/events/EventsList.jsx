@@ -3,10 +3,13 @@ import { supabase } from '../../lib/supabase.js';
 import { computeEventTotals } from './eventTotals.js';
 import { formatPeso } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
+import { toast } from '../../components/toast.jsx';
+import { SkeletonRows } from '../../components/Skeleton.jsx';
 
 export default function EventsList({ org, onOpen }) {
   const [events, setEvents] = useState([]);
   const [name, setName] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -15,17 +18,21 @@ export default function EventsList({ org, onOpen }) {
       .eq('organization_id', org.id)
       .order('created_at', { ascending: false });
     setEvents(data || []);
+    setLoading(false);
   }, [org.id]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { setLoading(true); load(); }, [load]);
 
   async function addEvent(e) {
     e.preventDefault();
     if (!name.trim()) return;
     await supabase.from('events').insert({ organization_id: org.id, name: name.trim() });
     setName('');
+    toast.success('Event created');
     load();
   }
+
+  if (loading) return <SkeletonRows rows={5} />;
 
   return (
     <div className="panel">
