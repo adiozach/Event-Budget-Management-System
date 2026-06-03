@@ -2,6 +2,12 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatPeso } from '../../lib/format.js';
 
+// jsPDF's built-in fonts can't render the ₱ glyph (it shows as "±"),
+// so for the PDF we use the standard "PHP" currency code instead.
+function peso(n) {
+  return formatPeso(n).replace('₱', 'PHP ');
+}
+
 export function exportPdf(model) {
   const doc = new jsPDF();
   const h = model.header;
@@ -15,24 +21,24 @@ export function exportPdf(model) {
   autoTable(doc, {
     startY: 42,
     head: [['Category', 'Planned', 'Spent', 'Difference']],
-    body: model.budgetRows.map((r) => [r.name, formatPeso(r.planned), formatPeso(r.spent), formatPeso(r.difference)]),
+    body: model.budgetRows.map((r) => [r.name, peso(r.planned), peso(r.spent), peso(r.difference)]),
   });
 
   autoTable(doc, {
     head: [['Income Source', 'Amount']],
-    body: model.incomeRows.map((r) => [r.source, formatPeso(r.amount)]),
+    body: model.incomeRows.map((r) => [r.source, peso(r.amount)]),
   });
 
   const t = model.totals;
   autoTable(doc, {
     head: [['Total Planned', 'Total Spent', 'Total Income', 'Net Balance']],
-    body: [[formatPeso(t.totalPlanned), formatPeso(t.totalSpent), formatPeso(t.totalIncome), formatPeso(t.netBalance)]],
+    body: [[peso(t.totalPlanned), peso(t.totalSpent), peso(t.totalIncome), peso(t.netBalance)]],
   });
 
   if (model.pending.length) {
     autoTable(doc, {
       head: [['Pending Approval — Description', 'Amount']],
-      body: model.pending.map((p) => [p.description || '(no description)', formatPeso(p.amount)]),
+      body: model.pending.map((p) => [p.description || '(no description)', peso(p.amount)]),
     });
   }
 
