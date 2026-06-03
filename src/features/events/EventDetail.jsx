@@ -26,9 +26,9 @@ export default function EventDetail({ org, event, profile, onBack }) {
 
   const load = useCallback(async () => {
     const [{ data: categories }, { data: expenses }, { data: income }] = await Promise.all([
-      supabase.from('budget_categories').select('*').eq('event_id', event.id),
-      supabase.from('expenses').select('*').eq('event_id', event.id),
-      supabase.from('income').select('*').eq('event_id', event.id),
+      supabase.from('budget_categories').select('*').eq('event_id', event.id).order('name'),
+      supabase.from('expenses').select('*, receipt:receipts(file_path)').eq('event_id', event.id).order('expense_date', { ascending: false }),
+      supabase.from('income').select('*, receipt:receipts(file_path)').eq('event_id', event.id).order('income_date', { ascending: false }),
     ]);
     setData({ categories: categories || [], expenses: expenses || [], income: income || [] });
     setLoading(false);

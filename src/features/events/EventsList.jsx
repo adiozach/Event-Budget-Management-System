@@ -8,8 +8,10 @@ import { SkeletonRows } from '../../components/Skeleton.jsx';
 
 export default function EventsList({ org, onOpen }) {
   const [events, setEvents] = useState([]);
-  const [name, setName] = useState('');
+  const [form, setForm] = useState({ name: '', event_date: '', location: 'Lucena City, Quezon' });
   const [loading, setLoading] = useState(true);
+
+  function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
   const load = useCallback(async () => {
     const { data } = await supabase
@@ -25,9 +27,14 @@ export default function EventsList({ org, onOpen }) {
 
   async function addEvent(e) {
     e.preventDefault();
-    if (!name.trim()) return;
-    await supabase.from('events').insert({ organization_id: org.id, name: name.trim() });
-    setName('');
+    if (!form.name.trim()) return;
+    await supabase.from('events').insert({
+      organization_id: org.id,
+      name: form.name.trim(),
+      event_date: form.event_date || null,
+      location: form.location.trim() || 'Lucena City, Quezon',
+    });
+    setForm({ name: '', event_date: '', location: 'Lucena City, Quezon' });
     toast.success('Event created');
     load();
   }
@@ -39,8 +46,12 @@ export default function EventsList({ org, onOpen }) {
       <div className="panel-head">
         <h2 className="panel-title">All Events</h2>
         <form onSubmit={addEvent} className="form-row" style={{ margin: 0 }}>
-          <input className="input" placeholder="New event name" value={name}
-            onChange={(e) => setName(e.target.value)} />
+          <input className="input" placeholder="New event name" value={form.name}
+            onChange={(e) => set('name', e.target.value)} />
+          <input className="input" type="date" title="Event date" value={form.event_date}
+            onChange={(e) => set('event_date', e.target.value)} />
+          <input className="input" placeholder="Location" value={form.location}
+            onChange={(e) => set('location', e.target.value)} />
           <button className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> New Event</button>
         </form>
       </div>
@@ -51,7 +62,7 @@ export default function EventsList({ org, onOpen }) {
         <table className="table">
           <thead>
             <tr>
-              <th>Event</th><th>Status</th><th>Planned</th><th>Spent</th>
+              <th>Event</th><th>Date</th><th>Status</th><th>Planned</th><th>Spent</th>
               <th>Income</th><th>Balance</th><th></th>
             </tr>
           </thead>
@@ -65,6 +76,7 @@ export default function EventsList({ org, onOpen }) {
               return (
                 <tr key={ev.id}>
                   <td style={{ fontWeight: 600 }}>{ev.name}</td>
+                  <td className="muted">{ev.event_date || '—'}</td>
                   <td><span className={`pill ${ev.status}`}>{ev.status}</span></td>
                   <td className="num">{formatPeso(t.totalPlanned)}</td>
                   <td className="num">{formatPeso(t.totalSpent)}</td>
