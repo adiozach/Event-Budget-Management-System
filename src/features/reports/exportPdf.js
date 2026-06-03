@@ -71,11 +71,7 @@ export function exportPdf(model) {
     body: model.budgetRows.map((r) => [r.name, peso(r.planned), peso(r.spent), peso(r.difference)]),
   });
 
-  // Bar chart of budget vs actual
-  let y = drawBudgetChart(doc, model.budgetRows, doc.lastAutoTable.finalY + 12);
-
   autoTable(doc, {
-    startY: y,
     head: [['Income Source', 'Amount']],
     body: model.incomeRows.map((r) => [r.source, peso(r.amount)]),
   });
@@ -93,7 +89,15 @@ export function exportPdf(model) {
     });
   }
 
-  const sy = doc.lastAutoTable.finalY + 20;
+  // Graph at the LAST part of the report (after all tables).
+  const pageH = doc.internal.pageSize.getHeight();
+  let y = doc.lastAutoTable.finalY + 16;
+  if (y + 75 > pageH) { doc.addPage(); y = 22; } // new page if it won't fit
+  y = drawBudgetChart(doc, model.budgetRows, y);
+
+  // Signature lines at the very bottom.
+  const sy = y + 8;
+  doc.setFontSize(10);
   doc.text('Prepared by: ____________________', 14, sy);
   doc.text('Approved by: ____________________', 14, sy + 10);
 
