@@ -6,7 +6,7 @@ import Icon from '../../components/Icon.jsx';
 import { toast } from '../../components/toast.jsx';
 import { SkeletonRows } from '../../components/Skeleton.jsx';
 
-export default function EventsList({ org, onOpen }) {
+export default function EventsList({ org, onOpen, profile }) {
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState({ name: '', event_date: '', location: 'Lucena City, Quezon' });
   const [loading, setLoading] = useState(true);
@@ -38,6 +38,16 @@ export default function EventsList({ org, onOpen }) {
     toast.success('Event created');
     load();
   }
+
+  async function removeEvent(ev) {
+    if (!window.confirm(`Delete event "${ev.name}"?\n\nThis will also delete its budget, expenses, and income. This cannot be undone.`)) return;
+    const { error } = await supabase.from('events').delete().eq('id', ev.id);
+    if (error) return toast.error(error.message);
+    toast.success('Event deleted');
+    load();
+  }
+
+  const isAdmin = profile?.role === 'admin';
 
   if (loading) return <SkeletonRows rows={5} />;
 
@@ -82,7 +92,14 @@ export default function EventsList({ org, onOpen }) {
                   <td className="num">{formatPeso(t.totalSpent)}</td>
                   <td className="num">{formatPeso(t.totalIncome)}</td>
                   <td className={`num ${t.netBalance < 0 ? 'neg' : 'pos'}`}>{formatPeso(t.netBalance)}</td>
-                  <td><button className="btn btn-sm" onClick={() => onOpen(ev)}>Open</button></td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="btn btn-sm" onClick={() => onOpen(ev)}>Open</button>
+                      {isAdmin && (
+                        <button className="btn btn-sm btn-reject" onClick={() => removeEvent(ev)}>Delete</button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               );
             })}

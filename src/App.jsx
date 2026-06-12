@@ -126,7 +126,7 @@ export default function App() {
             ) : openEvent ? (
               <EventDetail org={org} event={openEvent} profile={profile} onBack={() => setOpenEvent(null)} />
             ) : org ? (
-              <EventsList org={org} onOpen={setOpenEvent} />
+              <EventsList org={org} onOpen={setOpenEvent} profile={profile} />
             ) : (
               <div className="empty">
                 <h3>Welcome, {profile?.name || 'there'} 👋</h3>
