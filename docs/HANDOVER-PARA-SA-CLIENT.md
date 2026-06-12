@@ -1,4 +1,4 @@
-# Event Budget Tracker — Handover Note
+# Event Budget Management System — Handover Note
 
 **Para sa:** Grace Baptist Church
 **Petsa ng turnover:** _______________
@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Ano ang Event Budget Tracker?
+## 1. Ano ang Event Budget Management System?
 
 Isang **desktop application** (para sa Windows) na ginawa para i-track ang budget ng
 mga event ng **Church** at **School** sa Lucena City. Kaya nitong:
@@ -25,7 +25,7 @@ gumagamit kahit magkaibang computer.
 
 ## 2. Paano i-install (one-time)
 
-1. Kunin ang file na **`Event Budget Tracker Setup 1.0.0.exe`** (galing sa USB / Google Drive).
+1. Kunin ang file na **`Event Budget Management System Setup 1.0.0.exe`** (galing sa USB / Google Drive).
 2. I-double click ito.
 3. ⚠️ Kung may lumabas na asul na **"Windows protected your PC"**:
    - I-click ang **"More info"** → tapos **"Run anyway"**.
@@ -93,4 +93,4 @@ Para sa teknikal na problema, kontakin ang developer:
 
 ---
 
-*Salamat sa pagtitiwala. — Event Budget Tracker, v1.0.0*
+*Salamat sa pagtitiwala. — Event Budget Management System, v1.0.0*

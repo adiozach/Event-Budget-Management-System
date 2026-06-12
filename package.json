@@ -1,7 +1,7 @@
 {
   "name": "budget-tracker",
   "version": "1.0.0",
-  "description": "Event Budget Tracker for church and school (Lucena City, Quezon)",
+  "description": "Event Budget Management System for church and school (Lucena City, Quezon)",
   "main": "electron/main.js",
   "scripts": {
     "dev:vite": "vite",

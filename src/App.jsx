@@ -57,8 +57,8 @@ export default function App() {
           <div className="brand">
             <img src={logo} className="brand-logo" alt="Logo" />
             <div>
-              <div className="brand-name">Budget Tracker</div>
-              <div className="brand-sub">Lucena City</div>
+              <div className="brand-name">Event Budget</div>
+              <div className="brand-sub">Management System</div>
             </div>
           </div>
 

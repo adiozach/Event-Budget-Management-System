@@ -26,7 +26,7 @@ export default function LoginScreen({ onSignIn }) {
         <div className="brand" style={{ flexDirection: 'column', gap: 8 }}>
           <img src={logo} className="brand-logo-lg" alt="Logo" />
           <div style={{ textAlign: 'center' }}>
-            <div className="brand-name">Budget Tracker</div>
+            <div className="brand-name">Event Budget Management System</div>
             <div className="brand-sub">Lucena City</div>
           </div>
         </div>

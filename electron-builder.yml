@@ -1,5 +1,5 @@
 appId: com.lucena.eventbudgettracker
-productName: Event Budget Tracker
+productName: Event Budget Management System
 directories:
   output: release
   buildResources: build
@@ -15,4 +15,4 @@ nsis:
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
   installerHeaderIcon: build/icon.ico
-  shortcutName: Event Budget Tracker
+  shortcutName: Event Budget Management System

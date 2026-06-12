@@ -1,11 +1,11 @@
-# Event Budget Tracker — Gabay sa Paggamit
+# Event Budget Management System — Gabay sa Paggamit
 
-Isang simpleng gabay kung paano gamitin ang **Event Budget Tracker** para sa Church at School (Lucena City).
+Isang simpleng gabay kung paano gamitin ang **Event Budget Management System** para sa Church at School (Lucena City).
 
 ---
 
 ## 1. Pag-login
-1. Buksan ang **Event Budget Tracker** (i-double click ang app icon).
+1. Buksan ang **Event Budget Management System** (i-double click ang app icon).
 2. Ilagay ang iyong **email** at **password** na binigay ng admin.
 3. I-click ang **Sign in**.
 
