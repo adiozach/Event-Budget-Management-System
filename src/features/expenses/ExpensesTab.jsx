@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import { uploadReceipt } from '../receipts/uploadReceipt.js';
 import { toast } from '../../components/toast.jsx';
+import { logAudit } from '../../lib/audit.js';
 
 const EMPTY = { amount: '', expense_date: '', description: '', paid_by: '', category_id: '' };
 
@@ -12,6 +13,7 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
   const [editingId, setEditingId] = useState(null);
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
+  const isAdmin = profile?.role === 'admin';
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -45,12 +47,14 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
       if (editingId) {
         const { error } = await supabase.from('expenses').update(fields).eq('id', editingId);
         if (error) throw error;
+        await logAudit(profile, 'expense.edit', { entityType: 'expense', entityId: editingId, details: `Edited expense: ${formatPeso(amount)} ${form.description || ''}`.trim() });
       } else {
         const { data: row, error } = await supabase.from('expenses')
           .insert({ event_id: event.id, approval_status: 'pending', ...fields })
           .select().single();
         if (error) throw error;
         rowId = row.id;
+        await logAudit(profile, 'expense.add', { entityType: 'expense', entityId: rowId, details: `Added expense: ${formatPeso(amount)} ${form.description || ''}`.trim() });
       }
       if (file) {
         const receipt = await uploadReceipt(file, { linkedType: 'expense', linkedId: rowId, uploadedBy: profile.id });
@@ -67,16 +71,30 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
     }
   }
 
-  async function decide(id, status) {
-    await supabase.from('expenses').update({ approval_status: status, approved_by: profile.id }).eq('id', id);
+  async function decide(x, status) {
+    const { error } = await supabase.from('expenses')
+      .update({ approval_status: status, approved_by: profile.id }).eq('id', x.id);
+    if (error) return toast.error(error.message);
+    await logAudit(profile, `expense.${status}`, { entityType: 'expense', entityId: x.id, details: `${status === 'approved' ? 'Approved' : 'Rejected'} ${formatPeso(x.amount)} ${x.description || ''}`.trim() });
     toast.success(status === 'approved' ? 'Expense approved' : 'Expense rejected');
     onChange();
   }
 
-  async function remove(id) {
-    if (!window.confirm('Delete this expense?')) return;
-    const { error } = await supabase.from('expenses').delete().eq('id', id);
+  async function revert(x) {
+    if (!window.confirm('Revert this expense back to pending so it can be edited?')) return;
+    const { error } = await supabase.from('expenses')
+      .update({ approval_status: 'pending', approved_by: null }).eq('id', x.id);
     if (error) return toast.error(error.message);
+    await logAudit(profile, 'expense.revert', { entityType: 'expense', entityId: x.id, details: `Reverted to pending: ${formatPeso(x.amount)} ${x.description || ''}`.trim() });
+    toast.success('Reverted to pending');
+    onChange();
+  }
+
+  async function remove(x) {
+    if (!window.confirm('Delete this expense?')) return;
+    const { error } = await supabase.from('expenses').delete().eq('id', x.id);
+    if (error) return toast.error(error.message);
+    await logAudit(profile, 'expense.delete', { entityType: 'expense', entityId: x.id, details: `Deleted expense: ${formatPeso(x.amount)} ${x.description || ''}`.trim() });
     toast.success('Expense deleted');
     onChange();
   }
@@ -110,32 +128,45 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
         <table className="table">
           <thead><tr><th>Date</th><th>Description</th><th>Paid by</th><th>Amount</th><th>Status</th><th>Receipt</th><th>Action</th></tr></thead>
           <tbody>
-            {expenses.map((x) => (
-              <tr key={x.id}>
-                <td>{x.expense_date}</td>
-                <td>{x.description}</td>
-                <td>{x.paid_by}</td>
-                <td className="num">{formatPeso(x.amount)}</td>
-                <td><span className={`pill ${x.approval_status}`}>{x.approval_status}</span></td>
-                <td>
-                  {x.receipt?.file_path
-                    ? <button className="btn btn-sm" onClick={() => viewReceipt(x.receipt.file_path)}>View</button>
-                    : <span className="muted">—</span>}
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {x.approval_status === 'pending' && (
-                      <>
-                        <button className="btn btn-sm btn-approve" onClick={() => decide(x.id, 'approved')}>Approve</button>
-                        <button className="btn btn-sm btn-reject" onClick={() => decide(x.id, 'rejected')}>Reject</button>
-                      </>
-                    )}
-                    <button className="btn btn-sm" onClick={() => startEdit(x)}>Edit</button>
-                    <button className="btn btn-sm btn-reject" onClick={() => remove(x.id)}>Delete</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {expenses.map((x) => {
+              const locked = x.approval_status !== 'pending';
+              return (
+                <tr key={x.id}>
+                  <td>{x.expense_date}</td>
+                  <td>{x.description}</td>
+                  <td>{x.paid_by}</td>
+                  <td className="num">{formatPeso(x.amount)}</td>
+                  <td>
+                    <span className={`pill ${x.approval_status}`}>{x.approval_status}</span>
+                    {locked && <span title="Locked" style={{ marginLeft: 6 }}>🔒</span>}
+                  </td>
+                  <td>
+                    {x.receipt?.file_path
+                      ? <button className="btn btn-sm" onClick={() => viewReceipt(x.receipt.file_path)}>View</button>
+                      : <span className="muted">—</span>}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {!locked && (
+                        <>
+                          <button className="btn btn-sm btn-approve" onClick={() => decide(x, 'approved')}>Approve</button>
+                          <button className="btn btn-sm btn-reject" onClick={() => decide(x, 'rejected')}>Reject</button>
+                          <button className="btn btn-sm" onClick={() => startEdit(x)}>Edit</button>
+                          <button className="btn btn-sm btn-reject" onClick={() => remove(x)}>Delete</button>
+                        </>
+                      )}
+                      {locked && isAdmin && (
+                        <>
+                          <button className="btn btn-sm" onClick={() => revert(x)}>Revert to pending</button>
+                          <button className="btn btn-sm btn-reject" onClick={() => remove(x)}>Delete</button>
+                        </>
+                      )}
+                      {locked && !isAdmin && <span className="muted">Locked</span>}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

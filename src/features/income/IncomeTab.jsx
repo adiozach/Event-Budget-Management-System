@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase.js';
 import { formatPeso } from '../../lib/format.js';
 import { uploadReceipt } from '../receipts/uploadReceipt.js';
 import { toast } from '../../components/toast.jsx';
+import { logAudit } from '../../lib/audit.js';
 
 const EMPTY = { amount: '', income_date: '', source: '', description: '' };
 
@@ -42,12 +43,14 @@ export default function IncomeTab({ event, income, profile, onChange }) {
       if (editingId) {
         const { error } = await supabase.from('income').update(fields).eq('id', editingId);
         if (error) throw error;
+        await logAudit(profile, 'income.edit', { entityType: 'income', entityId: editingId, details: `Edited income: ${formatPeso(amount)} from ${fields.source}` });
       } else {
         const { data: row, error } = await supabase.from('income')
           .insert({ event_id: event.id, ...fields })
           .select().single();
         if (error) throw error;
         rowId = row.id;
+        await logAudit(profile, 'income.add', { entityType: 'income', entityId: rowId, details: `Added income: ${formatPeso(amount)} from ${fields.source}` });
       }
       if (file) {
         const receipt = await uploadReceipt(file, { linkedType: 'income', linkedId: rowId, uploadedBy: profile.id });
@@ -64,10 +67,11 @@ export default function IncomeTab({ event, income, profile, onChange }) {
     }
   }
 
-  async function remove(id) {
+  async function remove(i) {
     if (!window.confirm('Delete this income entry?')) return;
-    const { error } = await supabase.from('income').delete().eq('id', id);
+    const { error } = await supabase.from('income').delete().eq('id', i.id);
     if (error) return toast.error(error.message);
+    await logAudit(profile, 'income.delete', { entityType: 'income', entityId: i.id, details: `Deleted income: ${formatPeso(i.amount)} from ${i.source}` });
     toast.success('Income deleted');
     onChange();
   }
@@ -112,7 +116,7 @@ export default function IncomeTab({ event, income, profile, onChange }) {
                 <td>
                   <div style={{ display: 'flex', gap: 6 }}>
                     <button className="btn btn-sm" onClick={() => startEdit(i)}>Edit</button>
-                    <button className="btn btn-sm btn-reject" onClick={() => remove(i.id)}>Delete</button>
+                    <button className="btn btn-sm btn-reject" onClick={() => remove(i)}>Delete</button>
                   </div>
                 </td>
               </tr>

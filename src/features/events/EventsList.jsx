@@ -5,6 +5,7 @@ import { formatPeso } from '../../lib/format.js';
 import Icon from '../../components/Icon.jsx';
 import { toast } from '../../components/toast.jsx';
 import { SkeletonRows } from '../../components/Skeleton.jsx';
+import { logAudit } from '../../lib/audit.js';
 
 export default function EventsList({ org, onOpen, profile }) {
   const [events, setEvents] = useState([]);
@@ -28,12 +29,13 @@ export default function EventsList({ org, onOpen, profile }) {
   async function addEvent(e) {
     e.preventDefault();
     if (!form.name.trim()) return;
-    await supabase.from('events').insert({
+    const { data: row } = await supabase.from('events').insert({
       organization_id: org.id,
       name: form.name.trim(),
       event_date: form.event_date || null,
       location: form.location.trim() || 'Lucena City, Quezon',
-    });
+    }).select().single();
+    await logAudit(profile, 'event.create', { entityType: 'event', entityId: row?.id, details: `Created event "${form.name.trim()}" in ${org.name}` });
     setForm({ name: '', event_date: '', location: 'Lucena City, Quezon' });
     toast.success('Event created');
     load();
@@ -43,6 +45,7 @@ export default function EventsList({ org, onOpen, profile }) {
     if (!window.confirm(`Delete event "${ev.name}"?\n\nThis will also delete its budget, expenses, and income. This cannot be undone.`)) return;
     const { error } = await supabase.from('events').delete().eq('id', ev.id);
     if (error) return toast.error(error.message);
+    await logAudit(profile, 'event.delete', { entityType: 'event', entityId: ev.id, details: `Deleted event "${ev.name}" in ${org.name}` });
     toast.success('Event deleted');
     load();
   }
