@@ -151,6 +151,16 @@ input, select { font-family: inherit; }
   border-radius: 999px; text-align: center;
   box-shadow: 0 0 0 2px var(--bg-0);
 }
+.bell-wrap { position: relative; }
+.bell-backdrop { position: fixed; inset: 0; z-index: 50; }
+.bell-panel {
+  position: absolute; top: 50px; right: 0; width: 330px; max-height: 400px; overflow-y: auto;
+  background: var(--bg-2); border: 1px solid var(--border-strong);
+  border-radius: 14px; box-shadow: var(--shadow); z-index: 51; padding: 8px;
+}
+.bell-head { font-weight: 700; font-size: 13px; padding: 8px 10px 10px; border-bottom: 1px solid var(--border); }
+.bell-item { display: block; width: 100%; text-align: left; background: transparent; border: none; color: var(--text); padding: 10px; border-radius: 10px; cursor: pointer; font-size: 13px; }
+.bell-item:hover { background: var(--panel); }
 
 .content { padding: 28px; overflow-y: auto; flex: 1; }
 .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }

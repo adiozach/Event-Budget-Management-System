@@ -9,6 +9,7 @@ import OfflineBanner from './components/OfflineBanner.jsx';
 import Icon from './components/Icon.jsx';
 import { Toaster, toast } from './components/toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
+import { formatPeso } from './lib/format.js';
 import logo from './assets/logo.png';
 
 function initials(name) {
@@ -23,7 +24,9 @@ export default function App() {
   const [openEvent, setOpenEvent] = useState(null);
   const [view, setView] = useState('events'); // 'events' | 'settings'
   const [search, setSearch] = useState('');
-  const [pending, setPending] = useState(0);
+  const [pendingItems, setPendingItems] = useState([]);
+  const [bellOpen, setBellOpen] = useState(false);
+  const pending = pendingItems.length;
 
   useEffect(() => {
     if (!session) return;
@@ -31,13 +34,36 @@ export default function App() {
       .then(({ data }) => setOrgs(data || []));
   }, [session]);
 
-  // Count expenses awaiting approval (refreshed on navigation).
+  // Pending expenses with their event + org (refreshed on navigation).
   useEffect(() => {
     if (!session) return;
-    supabase.from('expenses').select('*', { count: 'exact', head: true })
+    supabase.from('expenses')
+      .select('id, amount, description, event:events(id, name, status, event_date, location, organization_id, org:organizations(name))')
       .eq('approval_status', 'pending')
-      .then(({ count }) => setPending(count || 0));
+      .then(({ data }) => {
+        const items = (data || []).filter((r) => r.event).map((r) => ({
+          id: r.id,
+          amount: r.amount,
+          description: r.description,
+          eventName: r.event.name,
+          orgName: r.event.org?.name || '',
+          orgId: r.event.organization_id,
+          event: {
+            id: r.event.id, name: r.event.name, status: r.event.status,
+            event_date: r.event.event_date, location: r.event.location,
+            organization_id: r.event.organization_id,
+          },
+        }));
+        setPendingItems(items);
+      });
   }, [session, openEvent, view, org]);
+
+  function goToPending(it) {
+    setBellOpen(false);
+    setOrg({ id: it.orgId, name: it.orgName });
+    setOpenEvent(it.event);
+    setView('events');
+  }
 
   if (loading) return <div className="login-wrap"><p className="muted">Loading…</p></div>;
 
@@ -116,12 +142,35 @@ export default function App() {
               </div>
             ) : <div style={{ flex: 1 }} />}
             <div className="topbar-right">
-              <button className="icon-btn" style={{ position: 'relative' }}
-                title={pending ? `${pending} expense(s) awaiting approval` : 'No pending approvals'}
-                onClick={() => toast.info(pending ? `${pending} expense(s) awaiting approval. Open an event's Expenses tab to review.` : 'No pending approvals 🎉')}>
-                <Icon name="bell" size={18} />
-                {pending > 0 && <span className="badge">{pending > 99 ? '99+' : pending}</span>}
-              </button>
+              <div className="bell-wrap">
+                <button className="icon-btn" style={{ position: 'relative' }}
+                  title={pending ? `${pending} expense(s) awaiting approval` : 'No pending approvals'}
+                  onClick={() => setBellOpen((o) => !o)}>
+                  <Icon name="bell" size={18} />
+                  {pending > 0 && <span className="badge">{pending > 99 ? '99+' : pending}</span>}
+                </button>
+                {bellOpen && <div className="bell-backdrop" onClick={() => setBellOpen(false)} />}
+                {bellOpen && (
+                  <div className="bell-panel">
+                    <div className="bell-head">Pending Approvals ({pending})</div>
+                    {pending === 0 ? (
+                      <div className="muted" style={{ padding: 14, textAlign: 'center' }}>No pending approvals 🎉</div>
+                    ) : (
+                      pendingItems.map((it) => (
+                        <button key={it.id} className="bell-item" onClick={() => goToPending(it)}>
+                          <div style={{ fontWeight: 600 }}>
+                            <span className="pill planning" style={{ marginRight: 6 }}>{it.orgName}</span>
+                            {it.eventName}
+                          </div>
+                          <div className="muted" style={{ marginTop: 3 }}>
+                            {formatPeso(it.amount)}{it.description ? ` — ${it.description}` : ''}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="sidebar-user" style={{ border: 'none', background: 'transparent', padding: 0 }}>
                 <div className="avatar">{initials(profile?.name)}</div>
                 <div className="who">
