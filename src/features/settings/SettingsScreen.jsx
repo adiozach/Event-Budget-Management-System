@@ -96,11 +96,13 @@ export default function SettingsScreen({ profile }) {
             {users.map((u) => (
               <tr key={u.id}>
                 <td>
-                  <input className="input" style={{ fontWeight: 600, minWidth: 160 }} value={u.name || ''}
-                    onChange={(e) => setNameLocal(u.id, e.target.value)}
-                    onBlur={() => saveName(u)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
-                    title="Click to edit name" />
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <input className="input" style={{ fontWeight: 600, minWidth: 150 }} value={u.name || ''}
+                      onChange={(e) => setNameLocal(u.id, e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') saveName(u); }}
+                      title="Edit name, then click Save" />
+                    <button className="btn btn-sm btn-primary" onClick={() => saveName(u)}>Save</button>
+                  </div>
                 </td>
                 <td>{u.email}</td>
                 <td>
