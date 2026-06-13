@@ -15,7 +15,7 @@ export default function SettingsScreen({ profile }) {
   const [origNames, setOrigNames] = useState({});
   const [logs, setLogs] = useState([]);
   const [busy, setBusy] = useState(false);
-  const isAdmin = profile.role === 'admin';
+  const isAdmin = profile?.role === 'admin';
 
   async function doBackup() {
     setBusy(true);

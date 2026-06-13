@@ -8,6 +8,7 @@ import SettingsScreen from './features/settings/SettingsScreen.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
 import Icon from './components/Icon.jsx';
 import { Toaster } from './components/toast.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 import logo from './assets/logo.png';
 
 function initials(name) {
@@ -127,18 +128,20 @@ export default function App() {
               </div>
             </div>
 
-            {view === 'settings' ? (
-              <SettingsScreen profile={profile} />
-            ) : openEvent ? (
-              <EventDetail org={org} event={openEvent} profile={profile} onBack={() => setOpenEvent(null)} onUpdated={setOpenEvent} />
-            ) : org ? (
-              <EventsList org={org} onOpen={setOpenEvent} profile={profile} search={search} />
-            ) : (
-              <div className="empty">
-                <h3>Welcome, {profile?.name || 'there'} 👋</h3>
-                <p>Select <strong>Church</strong> or <strong>School</strong> from the sidebar to begin.</p>
-              </div>
-            )}
+            <ErrorBoundary>
+              {view === 'settings' ? (
+                <SettingsScreen profile={profile} />
+              ) : openEvent ? (
+                <EventDetail org={org} event={openEvent} profile={profile} onBack={() => setOpenEvent(null)} onUpdated={setOpenEvent} />
+              ) : org ? (
+                <EventsList org={org} onOpen={setOpenEvent} profile={profile} search={search} />
+              ) : (
+                <div className="empty">
+                  <h3>Welcome, {profile?.name || 'there'} 👋</h3>
+                  <p>Select <strong>Church</strong> or <strong>School</strong> from the sidebar to begin.</p>
+                </div>
+              )}
+            </ErrorBoundary>
           </div>
         </div>
       </div>
