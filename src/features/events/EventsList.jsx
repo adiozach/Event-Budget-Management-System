@@ -115,7 +115,7 @@ export default function EventsList({ org, onOpen, profile, search = '' }) {
             <p className="muted" style={{ marginTop: 0 }}>Add a new event under <strong>{org.name}</strong>.</p>
             <form onSubmit={addEvent}>
               <label className="field-label">Event name</label>
-              <input className="input" placeholder="e.g. Fiesta 2026" value={form.name}
+              <input className="input" placeholder="e.g. Church Anniversary" value={form.name}
                 onChange={(e) => set('name', e.target.value)} autoFocus required />
               <label className="field-label">Date</label>
               <input className="input" type="date" value={form.event_date}
