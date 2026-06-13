@@ -7,7 +7,7 @@ import { toast } from '../../components/toast.jsx';
 import { SkeletonRows } from '../../components/Skeleton.jsx';
 import { logAudit } from '../../lib/audit.js';
 
-export default function EventsList({ org, onOpen, profile }) {
+export default function EventsList({ org, onOpen, profile, search = '' }) {
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState({ name: '', event_date: '', location: 'Lucena City, Quezon' });
   const [loading, setLoading] = useState(true);
@@ -51,6 +51,10 @@ export default function EventsList({ org, onOpen, profile }) {
   }
 
   const isAdmin = profile?.role === 'admin';
+  const q = search.trim().toLowerCase();
+  const visible = q
+    ? events.filter((e) => (e.name || '').toLowerCase().includes(q) || (e.status || '').toLowerCase().includes(q))
+    : events;
 
   if (loading) return <SkeletonRows rows={5} />;
 
@@ -71,6 +75,8 @@ export default function EventsList({ org, onOpen, profile }) {
 
       {events.length === 0 ? (
         <div className="empty"><h3>No events yet</h3><p>Create your first event above.</p></div>
+      ) : visible.length === 0 ? (
+        <div className="empty"><p>No events match "{search}".</p></div>
       ) : (
         <table className="table">
           <thead>
@@ -80,7 +86,7 @@ export default function EventsList({ org, onOpen, profile }) {
             </tr>
           </thead>
           <tbody>
-            {events.map((ev) => {
+            {visible.map((ev) => {
               const t = computeEventTotals({
                 categories: ev.budget_categories || [],
                 expenses: ev.expenses || [],

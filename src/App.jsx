@@ -21,6 +21,7 @@ export default function App() {
   const [org, setOrg] = useState(null);
   const [openEvent, setOpenEvent] = useState(null);
   const [view, setView] = useState('events'); // 'events' | 'settings'
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (!session) return;
@@ -40,7 +41,8 @@ export default function App() {
     );
   }
 
-  function pickOrg(o) { setOrg(o); setOpenEvent(null); setView('events'); }
+  function pickOrg(o) { setOrg(o); setOpenEvent(null); setView('events'); setSearch(''); }
+  const onEventsList = view === 'events' && org && !openEvent;
 
   const title = view === 'settings'
     ? 'Settings'
@@ -95,10 +97,14 @@ export default function App() {
 
         <div className="main">
           <header className="topbar">
-            <div className="search">
-              <Icon name="search" size={16} />
-              <input placeholder="Search…" />
-            </div>
+            {onEventsList ? (
+              <div className="search">
+                <Icon name="search" size={16} />
+                <input placeholder="Search events…" value={search}
+                  onChange={(e) => setSearch(e.target.value)} />
+                {search && <button className="btn-link" style={{ padding: 0 }} onClick={() => setSearch('')}>✕</button>}
+              </div>
+            ) : <div style={{ flex: 1 }} />}
             <div className="topbar-right">
               <button className="icon-btn"><Icon name="bell" size={18} /></button>
               <div className="sidebar-user" style={{ border: 'none', background: 'transparent', padding: 0 }}>
@@ -124,9 +130,9 @@ export default function App() {
             {view === 'settings' ? (
               <SettingsScreen profile={profile} />
             ) : openEvent ? (
-              <EventDetail org={org} event={openEvent} profile={profile} onBack={() => setOpenEvent(null)} />
+              <EventDetail org={org} event={openEvent} profile={profile} onBack={() => setOpenEvent(null)} onUpdated={setOpenEvent} />
             ) : org ? (
-              <EventsList org={org} onOpen={setOpenEvent} profile={profile} />
+              <EventsList org={org} onOpen={setOpenEvent} profile={profile} search={search} />
             ) : (
               <div className="empty">
                 <h3>Welcome, {profile?.name || 'there'} 👋</h3>

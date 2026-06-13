@@ -66,6 +66,19 @@ export default function SettingsScreen({ profile }) {
     toast.success('Role updated');
   }
 
+  function setNameLocal(id, name) {
+    setUsers((arr) => arr.map((x) => (x.id === id ? { ...x, name } : x)));
+  }
+
+  async function saveName(u) {
+    const name = (u.name || '').trim();
+    if (!name) return;
+    await supabase.from('profiles').update({ name }).eq('id', u.id);
+    await logAudit(profile, 'profile.name_change', { entityType: 'profile', entityId: u.id, details: `Set display name of ${u.email} to "${name}"` });
+    toast.success('Name updated');
+    loadLogs();
+  }
+
   if (!isAdmin) {
     return <div className="panel"><p className="muted">Only admins can manage users.</p></div>;
   }
@@ -82,7 +95,13 @@ export default function SettingsScreen({ profile }) {
           <tbody>
             {users.map((u) => (
               <tr key={u.id}>
-                <td style={{ fontWeight: 600 }}>{u.name}</td>
+                <td>
+                  <input className="input" style={{ fontWeight: 600, minWidth: 160 }} value={u.name || ''}
+                    onChange={(e) => setNameLocal(u.id, e.target.value)}
+                    onBlur={() => saveName(u)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+                    title="Click to edit name" />
+                </td>
                 <td>{u.email}</td>
                 <td>
                   <select className="input" value={u.role} onChange={(e) => setRole(u, e.target.value)}>
