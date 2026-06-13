@@ -156,7 +156,7 @@ supabase/migrations/   database schema, RLS, triggers
 ## 👤 Author
 
 **Allan Chester Lagrason** — Lucena City, Quezon
-📧 allanchesterlagrason36@gmail.com
+📧 allanchesterlagrason30@gmail.com
 
 ---
 
