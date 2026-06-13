@@ -12,6 +12,7 @@ function fmtTime(ts) {
 
 export default function SettingsScreen({ profile }) {
   const [users, setUsers] = useState([]);
+  const [origNames, setOrigNames] = useState({});
   const [logs, setLogs] = useState([]);
   const [busy, setBusy] = useState(false);
   const isAdmin = profile.role === 'admin';
@@ -53,7 +54,11 @@ export default function SettingsScreen({ profile }) {
 
   useEffect(() => {
     if (!isAdmin) return;
-    supabase.from('profiles').select('*').order('name').then(({ data }) => setUsers(data || []));
+    supabase.from('profiles').select('*').order('name').then(({ data }) => {
+      const list = data || [];
+      setUsers(list);
+      setOrigNames(Object.fromEntries(list.map((u) => [u.id, u.name || ''])));
+    });
     loadLogs();
   }, [isAdmin, loadLogs]);
 
@@ -70,13 +75,23 @@ export default function SettingsScreen({ profile }) {
     setUsers((arr) => arr.map((x) => (x.id === id ? { ...x, name } : x)));
   }
 
-  async function saveName(u) {
-    const name = (u.name || '').trim();
-    if (!name) return;
-    await supabase.from('profiles').update({ name }).eq('id', u.id);
-    await logAudit(profile, 'profile.name_change', { entityType: 'profile', entityId: u.id, details: `Set display name of ${u.email} to "${name}"` });
-    toast.success('Name updated');
-    loadLogs();
+  async function saveAllNames() {
+    const changed = users.filter((u) => (u.name || '').trim() && (u.name || '').trim() !== (origNames[u.id] || ''));
+    if (changed.length === 0) { toast.info('No name changes to save'); return; }
+    setBusy(true);
+    try {
+      for (const u of changed) {
+        const name = u.name.trim();
+        const { error } = await supabase.from('profiles').update({ name }).eq('id', u.id);
+        if (error) throw error;
+        await logAudit(profile, 'profile.name_change', { entityType: 'profile', entityId: u.id, details: `Set display name of ${u.email} to "${name}"` });
+      }
+      setOrigNames((o) => { const n = { ...o }; for (const u of changed) n[u.id] = u.name.trim(); return n; });
+      toast.success(`Saved ${changed.length} name${changed.length > 1 ? 's' : ''}`);
+      loadLogs();
+    } catch (err) {
+      toast.error('Save failed: ' + err.message);
+    } finally { setBusy(false); }
   }
 
   if (!isAdmin) {
@@ -86,9 +101,14 @@ export default function SettingsScreen({ profile }) {
   return (
     <>
       <div className="panel">
-        <div className="panel-head"><h2 className="panel-title">Users &amp; Roles</h2></div>
+        <div className="panel-head">
+          <h2 className="panel-title">Users &amp; Roles</h2>
+          <button className="btn btn-sm btn-primary" disabled={busy} onClick={saveAllNames}>
+            {busy ? 'Saving…' : '💾 Save Names'}
+          </button>
+        </div>
         <p className="muted" style={{ marginTop: 0 }}>
-          To add a new user: create them in Supabase Auth — they appear here once their profile exists. Set roles below.
+          Edit names below, then click <strong>Save Names</strong> (top-right) to save all changes. Roles save instantly.
         </p>
         <table className="table">
           <thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
@@ -96,13 +116,10 @@ export default function SettingsScreen({ profile }) {
             {users.map((u) => (
               <tr key={u.id}>
                 <td>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <input className="input" style={{ fontWeight: 600, minWidth: 150 }} value={u.name || ''}
-                      onChange={(e) => setNameLocal(u.id, e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') saveName(u); }}
-                      title="Edit name, then click Save" />
-                    <button className="btn btn-sm btn-primary" onClick={() => saveName(u)}>Save</button>
-                  </div>
+                  <input className="input" style={{ fontWeight: 600, minWidth: 180 }} value={u.name || ''}
+                    onChange={(e) => setNameLocal(u.id, e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') saveAllNames(); }}
+                    title="Edit name, then click Save Names (top-right)" />
                 </td>
                 <td>{u.email}</td>
                 <td>
