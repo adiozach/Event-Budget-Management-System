@@ -109,15 +109,15 @@ export default function ExpensesTab({ event, data, profile, onChange }) {
     <div className="panel">
       <div className="panel-head"><h2 className="panel-title">{editingId ? 'Edit Expense' : 'Expenses'}</h2></div>
       <form onSubmit={save} className="form-row">
-        <input className="input" type="number" min="0" step="0.01" placeholder="Amount ₱"
-          value={form.amount} onChange={(e) => set('amount', e.target.value)} required />
-        <input className="input" type="date" value={form.expense_date} onChange={(e) => set('expense_date', e.target.value)} />
-        <input className="input" placeholder="Description" value={form.description} onChange={(e) => set('description', e.target.value)} />
-        <input className="input" placeholder="Paid by" value={form.paid_by} onChange={(e) => set('paid_by', e.target.value)} />
         <select className="input" value={form.category_id} onChange={(e) => set('category_id', e.target.value)}>
           <option value="">(no category)</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
+        <input className="input" type="number" min="0" step="0.01" placeholder="Amount ₱"
+          value={form.amount} onChange={(e) => set('amount', e.target.value)} required />
+        <input className="input" placeholder="Description" value={form.description} onChange={(e) => set('description', e.target.value)} />
+        <input className="input" placeholder="Paid by" value={form.paid_by} onChange={(e) => set('paid_by', e.target.value)} />
+        <input className="input" type="date" value={form.expense_date} onChange={(e) => set('expense_date', e.target.value)} />
         <input className="input" type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files[0] || null)} />
         <button className="btn btn-primary btn-sm" disabled={busy}>{busy ? 'Saving…' : editingId ? 'Update' : 'Add expense'}</button>
         {editingId && <button type="button" className="btn btn-sm" onClick={cancelEdit}>Cancel</button>}
