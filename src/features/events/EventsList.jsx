@@ -6,6 +6,15 @@ import Icon from '../../components/Icon.jsx';
 import { toast } from '../../components/toast.jsx';
 import { SkeletonRows } from '../../components/Skeleton.jsx';
 import { logAudit } from '../../lib/audit.js';
+import { computeOrgSummary } from '../dashboard/orgSummary.js';
+import { buildOrgReportModel, exportOrgPdf, exportOrgExcel } from '../reports/orgReport.js';
+
+const DASH = [
+  { key: 'totalPlanned', label: 'Total Planned', cls: 'teal', icon: 'wallet' },
+  { key: 'totalSpent', label: 'Total Spent', cls: 'purple', icon: 'card' },
+  { key: 'totalIncome', label: 'Total Income', cls: 'orange', icon: 'trend' },
+  { key: 'netBalance', label: 'Net Balance', cls: 'pink', icon: 'scale' },
+];
 
 export default function EventsList({ org, onOpen, profile, search = '' }) {
   const [events, setEvents] = useState([]);
@@ -56,12 +65,50 @@ export default function EventsList({ org, onOpen, profile, search = '' }) {
     ? events.filter((e) => (e.name || '').toLowerCase().includes(q) || (e.status || '').toLowerCase().includes(q))
     : events;
 
+  const summary = computeOrgSummary(events);
+
   if (loading) return <SkeletonRows rows={5} />;
 
   return (
-    <div className="panel">
-      <div className="panel-head">
-        <h2 className="panel-title">All Events</h2>
+    <>
+      <div className="kpi-grid">
+        {DASH.map((k) => (
+          <div key={k.key} className={`kpi-card ${k.cls}`}>
+            <div className="kpi-top">
+              <div className="kpi-icon"><Icon name={k.icon} size={20} /></div>
+              <div className="kpi-label">{k.label}</div>
+            </div>
+            <div className="kpi-value">{formatPeso(summary[k.key])}</div>
+            <div className="kpi-foot">{summary.totalEvents} event{summary.totalEvents !== 1 ? 's' : ''} in {org.name}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2 className="panel-title">
+            {org.name} Overview
+            {summary.pendingCount > 0 && (
+              <span className="pill pending" style={{ marginLeft: 10 }}>{summary.pendingCount} pending approval{summary.pendingCount !== 1 ? 's' : ''}</span>
+            )}
+          </h2>
+          <div className="form-row" style={{ margin: 0 }}>
+            <button className="btn btn-sm" disabled={!events.length} onClick={() => exportOrgPdf(buildOrgReportModel(org, events))}>
+              <Icon name="doc" size={15} /> Org Report PDF
+            </button>
+            <button className="btn btn-sm" disabled={!events.length} onClick={() => exportOrgExcel(buildOrgReportModel(org, events))}>
+              <Icon name="doc" size={15} /> Excel
+            </button>
+          </div>
+        </div>
+        <p className="muted" style={{ margin: 0 }}>
+          Summary across all events in {org.name}. {summary.pendingCount > 0 ? 'Some expenses are waiting for approval.' : 'All expenses are reviewed.'}
+        </p>
+      </div>
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2 className="panel-title">All Events</h2>
         <form onSubmit={addEvent} className="form-row" style={{ margin: 0 }}>
           <input className="input" placeholder="New event name" value={form.name}
             onChange={(e) => set('name', e.target.value)} />
@@ -115,6 +162,7 @@ export default function EventsList({ org, onOpen, profile, search = '' }) {
           </tbody>
         </table>
       )}
-    </div>
+      </div>
+    </>
   );
 }

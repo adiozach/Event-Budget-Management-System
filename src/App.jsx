@@ -7,7 +7,7 @@ import EventDetail from './features/events/EventDetail.jsx';
 import SettingsScreen from './features/settings/SettingsScreen.jsx';
 import OfflineBanner from './components/OfflineBanner.jsx';
 import Icon from './components/Icon.jsx';
-import { Toaster } from './components/toast.jsx';
+import { Toaster, toast } from './components/toast.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import logo from './assets/logo.png';
 
@@ -23,12 +23,21 @@ export default function App() {
   const [openEvent, setOpenEvent] = useState(null);
   const [view, setView] = useState('events'); // 'events' | 'settings'
   const [search, setSearch] = useState('');
+  const [pending, setPending] = useState(0);
 
   useEffect(() => {
     if (!session) return;
     supabase.from('organizations').select('*').order('name')
       .then(({ data }) => setOrgs(data || []));
   }, [session]);
+
+  // Count expenses awaiting approval (refreshed on navigation).
+  useEffect(() => {
+    if (!session) return;
+    supabase.from('expenses').select('*', { count: 'exact', head: true })
+      .eq('approval_status', 'pending')
+      .then(({ count }) => setPending(count || 0));
+  }, [session, openEvent, view, org]);
 
   if (loading) return <div className="login-wrap"><p className="muted">Loading…</p></div>;
 
@@ -107,7 +116,12 @@ export default function App() {
               </div>
             ) : <div style={{ flex: 1 }} />}
             <div className="topbar-right">
-              <button className="icon-btn"><Icon name="bell" size={18} /></button>
+              <button className="icon-btn" style={{ position: 'relative' }}
+                title={pending ? `${pending} expense(s) awaiting approval` : 'No pending approvals'}
+                onClick={() => toast.info(pending ? `${pending} expense(s) awaiting approval. Open an event's Expenses tab to review.` : 'No pending approvals 🎉')}>
+                <Icon name="bell" size={18} />
+                {pending > 0 && <span className="badge">{pending > 99 ? '99+' : pending}</span>}
+              </button>
               <div className="sidebar-user" style={{ border: 'none', background: 'transparent', padding: 0 }}>
                 <div className="avatar">{initials(profile?.name)}</div>
                 <div className="who">
