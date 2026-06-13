@@ -88,7 +88,7 @@ gumagamit kahit magkaibang computer.
 Para sa teknikal na problema, kontakin ang developer:
 
 - **Pangalan:** Allan Chester Lagrason
-- **Email:** allanchesterlagrason36@gmail.com
+- **Email:** allanchesterlagrason30@gmail.com
 - **Cellphone/Viber:** _______________
 
 ---
