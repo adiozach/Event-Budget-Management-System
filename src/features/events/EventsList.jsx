@@ -20,6 +20,7 @@ export default function EventsList({ org, onOpen, profile, search = '' }) {
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState({ name: '', event_date: '', location: 'Lucena City, Quezon' });
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -46,6 +47,7 @@ export default function EventsList({ org, onOpen, profile, search = '' }) {
     }).select().single();
     await logAudit(profile, 'event.create', { entityType: 'event', entityId: row?.id, details: `Created event "${form.name.trim()}" in ${org.name}` });
     setForm({ name: '', event_date: '', location: 'Lucena City, Quezon' });
+    setShowModal(false);
     toast.success('Event created');
     load();
   }
@@ -106,19 +108,37 @@ export default function EventsList({ org, onOpen, profile, search = '' }) {
         </p>
       </div>
 
+      {showModal && (
+        <div className="modal-backdrop" onClick={() => setShowModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h2>New Event</h2>
+            <p className="muted" style={{ marginTop: 0 }}>Add a new event under <strong>{org.name}</strong>.</p>
+            <form onSubmit={addEvent}>
+              <label className="field-label">Event name</label>
+              <input className="input" placeholder="e.g. Fiesta 2026" value={form.name}
+                onChange={(e) => set('name', e.target.value)} autoFocus required />
+              <label className="field-label">Date</label>
+              <input className="input" type="date" value={form.event_date}
+                onChange={(e) => set('event_date', e.target.value)} />
+              <label className="field-label">Location</label>
+              <input className="input" placeholder="Location" value={form.location}
+                onChange={(e) => set('location', e.target.value)} />
+              <div className="form-row" style={{ margin: 0, justifyContent: 'flex-end' }}>
+                <button type="button" className="btn" onClick={() => setShowModal(false)}>Cancel</button>
+                <button className="btn btn-primary"><Icon name="plus" size={15} /> Create Event</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="panel">
         <div className="panel-head">
           <h2 className="panel-title">All Events</h2>
-        <form onSubmit={addEvent} className="form-row" style={{ margin: 0 }}>
-          <input className="input" placeholder="New event name" value={form.name}
-            onChange={(e) => set('name', e.target.value)} />
-          <input className="input" type="date" title="Event date" value={form.event_date}
-            onChange={(e) => set('event_date', e.target.value)} />
-          <input className="input" placeholder="Location" value={form.location}
-            onChange={(e) => set('location', e.target.value)} />
-          <button className="btn btn-primary btn-sm"><Icon name="plus" size={15} /> New Event</button>
-        </form>
-      </div>
+          <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
+            <Icon name="plus" size={15} /> New Event
+          </button>
+        </div>
 
       {events.length === 0 ? (
         <div className="empty"><h3>No events yet</h3><p>Create your first event above.</p></div>
