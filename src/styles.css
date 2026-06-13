@@ -185,13 +185,14 @@ input, select { font-family: inherit; }
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow);
+  overflow-x: auto; /* tables scroll sideways instead of clipping buttons */
 }
 .panel + .panel { margin-top: 20px; }
 .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .panel-title { font-size: 16px; font-weight: 700; margin: 0; }
 
 /* ===== Tables ===== */
-.table { width: 100%; border-collapse: collapse; }
+.table { width: 100%; border-collapse: collapse; min-width: 820px; }
 .table thead th {
   text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
   color: var(--text-faint); font-weight: 600;
