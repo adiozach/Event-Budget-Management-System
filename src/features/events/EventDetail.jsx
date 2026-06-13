@@ -12,7 +12,7 @@ import ReportsTab from '../reports/ReportsTab.jsx';
 import AnalyticsTab from '../analytics/AnalyticsTab.jsx';
 import { SkeletonCards } from '../../components/Skeleton.jsx';
 
-const TABS = ['Overview', 'Analytics', 'Budget', 'Expenses', 'Income', 'Reports'];
+const TABS = ['Overview', 'Budget', 'Expenses', 'Income', 'Analytics', 'Reports'];
 const STATUSES = ['planning', 'active', 'closed'];
 
 const KPIS = [
